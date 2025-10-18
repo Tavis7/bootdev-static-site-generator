@@ -1,15 +1,22 @@
 import unittest
-from htmlnode import HTMLNode, LeafNode
+from htmlnode import HTMLNode, LeafNode, ParentNode
 
 class TestHTMLNode(unittest.TestCase):
-    def test_props_to_html(self):
+    def test_props_to_html_with_none(self):
         node = HTMLNode()
         self.assertEqual(node.props_to_html(), '')
 
+    def test_props_to_html_with_one(self):
         node = HTMLNode(props={"href": "https://boot.dev/"})
         self.assertEqual(node.props_to_html(),
                          ' href="https://boot.dev/"')
 
+        node = LeafNode("a", "link",
+                        props={"href": "https://boot.dev/"})
+        self.assertEqual(node.props_to_html(),
+                         ' href="https://boot.dev/"')
+
+    def test_props_to_html_with_two(self):
         node = HTMLNode(props={"href": "https://boot.dev/",
                                "target": "_blank"})
         self.assertEqual(node.props_to_html(),
@@ -25,6 +32,13 @@ class TestHTMLNode(unittest.TestCase):
         node = LeafNode("p", "this is a paragraph")
         self.assertEqual(node.to_html(), '<p>this is a paragraph</p>')
 
+        node = LeafNode("b", "this is bold text")
+        self.assertEqual(node.to_html(),
+                         ''.join(['<b>',
+                                  'this is bold text',
+                                  '</b>']))
+
+    def test_leaf_to_html_with_props(self):
         node = LeafNode("a", "this is a link", props={"href": "https://boot.dev/"})
         self.assertEqual(node.to_html(),
                          '<a href="https://boot.dev/">this is a link</a>')
@@ -45,8 +59,27 @@ class TestHTMLNode(unittest.TestCase):
                                   'this is another link',
                                   '</a>']))
 
-        node = LeafNode("b", "this is bold text")
-        self.assertEqual(node.to_html(),
-                         ''.join(['<b>',
-                                  'this is bold text',
-                                  '</b>']))
+    def test_to_html_with_child(self):
+        child = LeafNode("span", "child")
+        parent = ParentNode("div", [child])
+        self.assertEqual(parent.to_html(),
+                         "<div><span>child</span></div>")
+
+    def test_to_html_with_children(self):
+        children = [
+            LeafNode("span", "child"),
+            LeafNode("a", "link", {"href":"https://boot.dev/", "target":"_blank"}),
+            LeafNode("b", "bold")
+        ]
+        parent = ParentNode("div", children)
+        self.assertEqual(parent.to_html(),
+                         "".join(['<div><span>child</span>',
+                                  '<a href="https://boot.dev/" target="_blank">',
+                                  'link</a><b>bold</b></div>']))
+
+    def test_to_html_with_grandchild(self):
+        grandchild = LeafNode("b", "bold")
+        child = ParentNode("span", [grandchild])
+        parent = ParentNode("div", [child])
+        self.assertEqual(parent.to_html(),
+                         "<div><span><b>bold</b></span></div>")
