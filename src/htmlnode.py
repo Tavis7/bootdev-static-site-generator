@@ -17,3 +17,17 @@ class HTMLNode:
                           f'value="{self.value}"',
                           f'children="{self.children}"',
                           f'props={self.props})'])
+
+class LeafNode(HTMLNode):
+    def __init__(self, tag, value, props=None):
+        super().__init__(tag=tag, value=value, props=props)
+
+    def to_html(self):
+        if self.value == None:
+            raise ValueError("Leaf node with no value")
+
+        otag,ctag = "",""
+        if self.tag != None:
+            otag,ctag = f"<{self.tag}{self.props_to_html()}>",f"</{self.tag}>"
+
+        return f'{otag}{self.value}{ctag}'
