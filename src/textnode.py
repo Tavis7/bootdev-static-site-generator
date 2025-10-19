@@ -24,3 +24,15 @@ class TextNode:
     
     def __repr__(self):
         return f'TextNode("{self.text}", {self.text_type.value}, "{self.url}")'
+
+def split_nodes_delimiter(old_nodes, delimiter, text_type):
+    new_nodes = []
+    for node in old_nodes:
+        inside = True
+        for part in node.text.split(delimiter):
+            inside = not inside
+            new_nodes.append(TextNode(part,
+                                      node.text_type if not inside else text_type))
+        if inside:
+            raise Exception(f"Missing matching '{delimiter}' for {node.text}")
+    return new_nodes
