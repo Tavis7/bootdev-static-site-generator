@@ -1,5 +1,6 @@
 import unittest
-from htmlnode import HTMLNode, LeafNode, ParentNode
+from htmlnode import HTMLNode, LeafNode, ParentNode, text_node_to_html_node
+from textnode import TextNode, TextType
 
 class TestHTMLNode(unittest.TestCase):
     def test_props_to_html_with_none(self):
@@ -83,3 +84,55 @@ class TestHTMLNode(unittest.TestCase):
         parent = ParentNode("div", [child])
         self.assertEqual(parent.to_html(),
                          "<div><span><b>bold</b></span></div>")
+
+    def test_to_html_with_grandchildren(self):
+        grandchildren1 = [
+            LeafNode("b", "bold"),
+            LeafNode("i", "italic")
+        ]
+        grandchildren2 = [
+            LeafNode("em", "emphasis"),
+            LeafNode("span", "text")
+        ]
+        child1 = ParentNode("span", grandchildren1, {"id":"child1"})
+        child2 = ParentNode("span", grandchildren2)
+        parent = ParentNode("div", [child1, child2])
+        self.assertEqual(parent.to_html(),
+                         "".join(['<div>',
+                                  '<span id="child1">',
+                                  '<b>bold</b><i>italic</i>',
+                                  '</span>',
+                                  '<span>',
+                                  '<em>emphasis</em><span>text</span>',
+                                  '</span>',
+                                  '</div>']))
+
+    def test_text(self):
+        text_node = TextNode("Plain", TextType.PLAIN_TEXT)
+        html_node = text_node_to_html_node(text_node)
+        self.assertEqual(html_node.to_html(), "Plain")
+
+    def test_bold(self):
+        text_node = TextNode("Bold", TextType.BOLD_TEXT)
+        html_node = text_node_to_html_node(text_node)
+        self.assertEqual(html_node.to_html(), "<b>Bold</b>")
+
+    def test_italic(self):
+        text_node = TextNode("Italic", TextType.ITALIC_TEXT)
+        html_node = text_node_to_html_node(text_node)
+        self.assertEqual(html_node.to_html(), "<i>Italic</i>")
+
+    def test_code(self):
+        text_node = TextNode("Code", TextType.CODE_TEXT)
+        html_node = text_node_to_html_node(text_node)
+        self.assertEqual(html_node.to_html(), "<code>Code</code>")
+
+    def test_link(self):
+        text_node = TextNode("Link", TextType.LINK_TEXT, "https://boot.dev/")
+        html_node = text_node_to_html_node(text_node)
+        self.assertEqual(html_node.to_html(), '<a href="https://boot.dev/">Link</a>')
+
+    def test_image(self):
+        text_node = TextNode("Image", TextType.IMAGE_TEXT, "example.com/image.png")
+        html_node = text_node_to_html_node(text_node)
+        self.assertEqual(html_node.to_html(), '<img src="example.com/image.png" alt="Image"></img>')

@@ -13,6 +13,9 @@ class TextNode:
         self.text = text
         self.text_type = text_type
         self.url = url
+        if text_type == TextType.LINK_TEXT or text_type == TextType.IMAGE_TEXT:
+            if url == None:
+                raise Exception(f"{self.text_type.value} nodes require a URL")
 
     def __eq__(self, other):
         return (self.text == other.text
