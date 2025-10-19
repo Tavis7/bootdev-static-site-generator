@@ -75,6 +75,31 @@ class TestTextNode(unittest.TestCase):
         ])
 
 
+    def test_split_nodes_delimiter_nested(self):
+        node = TextNode("This **sentence** `contains _multiple_ t**ype**s of `text.",
+                        TextType.PLAIN_TEXT)
+        new_nodes = split_nodes_delimiter([node], "`", TextType.CODE_TEXT)
+        self.assertEqual(new_nodes, [
+            TextNode("This **sentence** ", TextType.PLAIN_TEXT),
+            TextNode("contains _multiple_ t**ype**s of ", TextType.CODE_TEXT),
+            TextNode("text.", TextType.PLAIN_TEXT),
+        ])
+
+        new_nodes = split_nodes_delimiter(new_nodes, "_", TextType.ITALIC_TEXT)
+        self.assertEqual(new_nodes, [
+            TextNode("This **sentence** ", TextType.PLAIN_TEXT),
+            TextNode("contains _multiple_ t**ype**s of ", TextType.CODE_TEXT),
+            TextNode("text.", TextType.PLAIN_TEXT),
+        ])
+
+        new_nodes = split_nodes_delimiter(new_nodes, "**", TextType.BOLD_TEXT)
+        self.assertEqual(new_nodes, [
+            TextNode("This ", TextType.PLAIN_TEXT),
+            TextNode("sentence", TextType.BOLD_TEXT),
+            TextNode(" ", TextType.PLAIN_TEXT),
+            TextNode("contains _multiple_ t**ype**s of ", TextType.CODE_TEXT),
+            TextNode("text.", TextType.PLAIN_TEXT),
+        ])
 
 if __name__ == "__main__":
     unittest.main()

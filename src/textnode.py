@@ -29,10 +29,13 @@ def split_nodes_delimiter(old_nodes, delimiter, text_type):
     new_nodes = []
     for node in old_nodes:
         inside = True
-        for part in node.text.split(delimiter):
-            inside = not inside
-            new_nodes.append(TextNode(part,
-                                      node.text_type if not inside else text_type))
-        if inside:
-            raise Exception(f"Missing matching '{delimiter}' for {node.text}")
+        if node.text_type != TextType.PLAIN_TEXT:
+            new_nodes.append(node) # Don't split non-text nodes
+        else:
+            for part in node.text.split(delimiter):
+                inside = not inside
+                new_nodes.append(TextNode(part,
+                                          node.text_type if not inside else text_type))
+            if inside:
+                raise Exception(f"Missing matching '{delimiter}' for {node.text}")
     return new_nodes
