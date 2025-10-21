@@ -1,6 +1,6 @@
 from textnode import TextType, TextNode, split_nodes_delimiter, extract_markdown_images, extract_markdown_links, split_nodes_images, split_nodes_links
 from htmlnode import HTMLNode, LeafNode, ParentNode, text_node_to_html_node
-from markdown import markdown_to_blocks
+from markdownblock import markdown_to_blocks
 print("Hello world")
 
 def main():
