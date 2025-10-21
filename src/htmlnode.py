@@ -1,4 +1,4 @@
-from textnode import TextType, TextNode
+from textnode import TextType, TextNode, text_to_textnodes
 from markdownblock import markdown_to_blocks, block_to_block_type, BlockType
 import re
 
@@ -72,6 +72,12 @@ def text_node_to_html_node(text_node):
         case _:
             raise Exception(f"Unknown text type: {text_node.text_type}")
 
+def text_nodes_to_html_nodes(text_nodes):
+    result = []
+    for text_node in text_nodes:
+        result.append(text_node_to_html_node(text_node))
+    return result
+
 def markdown_to_html_node(text):
     blocks = markdown_to_blocks(text)
     block_nodes = []
@@ -79,12 +85,15 @@ def markdown_to_html_node(text):
         block_type = block_to_block_type(block)
         match block_type:
             case BlockType.PARAGRAPH:
-                #todo Parse markdown
-                block_nodes.append(LeafNode("p", block))
+                text_nodes = text_to_textnodes(block)
+                html_nodes = text_nodes_to_html_nodes(text_nodes)
+                block_nodes.append(ParentNode("p", html_nodes))
             case BlockType.HEADING:
                 sides = block.split(" ", maxsplit=1)
                 level = len(sides[0])
-                block_nodes.append(LeafNode(f"h{level}", sides[1]))
+                text_nodes = text_to_textnodes(sides[1])
+                html_nodes = text_nodes_to_html_nodes(text_nodes)
+                block_nodes.append(ParentNode(f"h{level}", html_nodes))
             case BlockType.CODE:
                 block_text = block.split("\n")
                 block_nodes.append(
@@ -92,6 +101,7 @@ def markdown_to_html_node(text):
                                [LeafNode("code", "\n".join(block_text[1:-1]))]))
             case BlockType.QUOTE:
                 lines = block.split("\n")
+                finished_lines = []
                 for line in lines:
                     # Assume single level for now
                     # todo: multi-level quotes
@@ -100,7 +110,8 @@ def markdown_to_html_node(text):
                     rest = sides[0][1]
                     rest = rest.strip()
                     # todo Parse markdown
-                    block_nodes.append(LeafNode("blockquote", rest))
+                    finished_lines.append(rest)
+                block_nodes.append(LeafNode("blockquote", "\n".join(finished_lines)))
             case BlockType.UNORDERED_LIST:
                 lines = block.split("\n")
                 list_items = []

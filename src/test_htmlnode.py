@@ -2,6 +2,13 @@ import unittest
 from htmlnode import HTMLNode, LeafNode, ParentNode, text_node_to_html_node, markdown_to_html_node
 from textnode import TextNode, TextType
 
+def print_line_diff(a, b):
+    html_text = node.to_html()
+    for i in range(0, len(a)//80 + 1):
+        print()
+        print(a[i * 80: i * 80 + 80])
+        print(b[i * 80: i * 80 + 80])
+
 class TestHTMLNode(unittest.TestCase):
     def test_props_to_html_with_none(self):
         node = HTMLNode()
@@ -147,6 +154,9 @@ LeafNode("a", "link", {"href":"https://boot.dev/", "target":"_blank"}),
             "",
             "> a quote",
             "",
+            "> more quote",
+            "> even more quote",
+            "",
             "1. ordered list first",
             "2. ordered list second",
             "3. ordered list third",
@@ -165,8 +175,8 @@ LeafNode("a", "link", {"href":"https://boot.dev/", "target":"_blank"}),
         ])
 
         node = markdown_to_html_node(markdown)
-
-        self.assertEqual(node.to_html(), "".join([
+        
+        expected = "".join([
             "<div>", "<p>",
             "here's a paragraph",
             "</p>",
@@ -181,6 +191,10 @@ LeafNode("a", "link", {"href":"https://boot.dev/", "target":"_blank"}),
             "</li>", "</ul>",
             "<blockquote>",
             "a quote",
+            "</blockquote>",
+            "<blockquote>",
+            "more quote\n",
+            "even more quote",
             "</blockquote>",
             "<ol>", "<li>",
             "ordered list first",
@@ -204,4 +218,150 @@ LeafNode("a", "link", {"href":"https://boot.dev/", "target":"_blank"}),
             "<p>",
             "another paragraph",
             "</p>", "</div>"
+        ])
+
+        self.assertEqual(node.to_html(), expected)
+
+    def test_markdown_to_html_node_paragraphs_with_formatting(self):
+        markdown = "\n".join([
+            "here's a **paragraph**",
+        ])
+
+        node = markdown_to_html_node(markdown)
+
+        self.assertEqual(node.to_html(), "".join([
+            "<div>", "<p>",
+            "here's a ", "<b>", "paragraph", "</b>",
+            "</p>", "</div>"
         ]))
+
+        markdown = "\n".join([
+            "here's a **paragraph**",
+            "",
+            "here's _another_ **paragraph**",
+            "",
+            "here's one with [some](https://boot.dev/) [links](http://example.com/),",
+            "`code`, and a _newline_",
+        ])
+
+        node = markdown_to_html_node(markdown)
+
+        self.assertEqual(node.to_html(), "".join([
+            "<div>",
+            "<p>",
+            "here's a ", "<b>", "paragraph", "</b>",
+            "</p>",
+            "<p>",
+            "here's ", "<i>", "another", "</i>", " ", "<b>", "paragraph", "</b>",
+            "</p>",
+            "<p>",
+            "here's one with ",
+            '<a href="https://boot.dev/">', "some", "</a>",
+            " ",
+            '<a href="http://example.com/">', "links", "</a>",
+            ",\n",
+            "<code>", "code", "</code>", ", and a ", "<i>", "newline", "</i>",
+            "</p>",
+            "</div>"
+        ]))
+
+    def test_markdown_to_html_node_headers_with_formatting(self):
+        markdown = "\n".join([
+            "# here's a **header**",
+        ])
+
+        node = markdown_to_html_node(markdown)
+
+        self.assertEqual(node.to_html(), "".join([
+            "<div>", "<h1>",
+            "here's a ", "<b>", "header", "</b>",
+            "</h1>", "</div>"
+        ]))
+
+        markdown = "\n".join([
+            "## here's a **header**",
+            "",
+            "###### here's _another_ **header**",
+            "",
+            "".join(["#### here's one with [some](https://boot.dev/) ",
+                     "[links](http://example.com/), `code`, but no _newline_"])
+        ])
+
+        node = markdown_to_html_node(markdown)
+
+        expected = "".join([
+            "<div>",
+            "<h2>",
+            "here's a ", "<b>", "header", "</b>",
+            "</h2>",
+            "<h6>",
+            "here's ", "<i>", "another", "</i>", " ", "<b>", "header", "</b>",
+            "</h6>",
+            "<h4>",
+            "here's one with ",
+            '<a href="https://boot.dev/">', "some", "</a>",
+            " ",
+            '<a href="http://example.com/">', "links", "</a>", ", "
+            "<code>", "code", "</code>", ", but no ", "<i>", "newline", "</i>",
+            "</h4>",
+            "</div>"])
+
+        self.assertEqual(node.to_html(), expected)
+
+    def test_markdown_to_html_node_code_with_formatting(self):
+        markdown = "\n".join([
+            "```",
+            "# here's a **code block**",
+            "```"
+        ])
+
+        node = markdown_to_html_node(markdown)
+
+        self.assertEqual(node.to_html(), "".join([
+            "<div>", "<p>", "<code>",
+            "# here's a **code block**",
+            "</code>", "</p>", "</div>"
+        ]))
+
+    #def test_markdown_to_html_node_quote_with_formatting(self):
+    #    markdown = "\n".join([
+    #        "> here's a **quote**",
+    #    ])
+
+    #    node = markdown_to_html_node(markdown)
+
+    #    self.assertEqual(node.to_html(), "".join([
+    #        "<div>", "<blockquote>",
+    #        "here's a ", "<b>", "quote", "</b>",
+    #        "</blockquote>", "</div>"
+    #    ]))
+
+    #    markdown = "\n".join([
+    #        "## here's a **header**",
+    #        "",
+    #        "###### here's _another_ **header**",
+    #        "",
+    #        "".join(["#### here's one with [some](https://boot.dev/) ",
+    #                 "[links](http://example.com/), `code`, but no _newline_"])
+    #    ])
+
+    #    node = markdown_to_html_node(markdown)
+
+    #    expected = "".join([
+    #        "<div>",
+    #        "<h2>",
+    #        "here's a ", "<b>", "header", "</b>",
+    #        "</h2>",
+    #        "<h6>",
+    #        "here's ", "<i>", "another", "</i>", " ", "<b>", "header", "</b>",
+    #        "</h6>",
+    #        "<h4>",
+    #        "here's one with ",
+    #        '<a href="https://boot.dev/">', "some", "</a>",
+    #        " ",
+    #        '<a href="http://example.com/">', "links", "</a>", ", "
+    #        "<code>", "code", "</code>", ", but no ", "<i>", "newline", "</i>",
+    #        "</h4>",
+    #        "</div>"])
+
+    #    self.assertEqual(node.to_html(), expected)
