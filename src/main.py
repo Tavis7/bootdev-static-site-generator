@@ -5,29 +5,13 @@ print("Hello world")
 
 def main():
     markdown = "\n".join([
-        "here's a paragraph",
-        "",
         "- unordered list first",
         "- unordered list second",
         "- unordered list third",
         "",
-        "> a quote",
-        "",
         "1. ordered list first",
         "2. ordered list second",
         "3. ordered list third",
-        "",
-        "",
-        "```python",
-        "def say_hello():",
-        '    print "hello"',
-        "```",
-        "",
-        "# heading 1",
-        "",
-        "## heading 2",
-        "",
-        "another paragraph"
     ])
 
     nodes = markdown_to_html_node(markdown)

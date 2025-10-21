@@ -103,15 +103,14 @@ def markdown_to_html_node(text):
                 lines = block.split("\n")
                 finished_lines = []
                 for line in lines:
-                    # Assume single level for now
-                    # todo: multi-level quotes
-                    #sides = re.findall(r"(^>*)([^>].*$)", line)
                     sides = re.findall(r"(^>)(.*$)", line)
                     rest = sides[0][1]
                     rest = rest.strip()
-                    # todo Parse markdown
-                    finished_lines.append(rest)
-                block_nodes.append(LeafNode("blockquote", "\n".join(finished_lines)))
+                    text_nodes = text_to_textnodes(rest)
+                    html_nodes = text_nodes_to_html_nodes(text_nodes)
+                    finished_lines.extend(html_nodes)
+                    finished_lines.append(LeafNode(None, " "))
+                block_nodes.append(ParentNode("blockquote", finished_lines[:-1]))
             case BlockType.UNORDERED_LIST:
                 lines = block.split("\n")
                 list_items = []
@@ -120,8 +119,9 @@ def markdown_to_html_node(text):
                     if len(line_matches) != 1:
                         raise Exception(f"wrong number of matches: {len(line_matches)} != 1")
                     line_text = line_matches[0].strip()
-                    #todo Parse markdown
-                    list_items.append(LeafNode("li", line_text))
+                    text_nodes = text_to_textnodes(line_text)
+                    html_nodes = text_nodes_to_html_nodes(text_nodes)
+                    list_items.append(ParentNode("li", html_nodes))
                 block_nodes.append(ParentNode("ul", list_items))
             case BlockType.ORDERED_LIST:
                 lines = block.split("\n")
@@ -131,8 +131,9 @@ def markdown_to_html_node(text):
                     if len(line_matches) != 1:
                         raise Exception(f"wrong number of matches: {len(line_matches)} != 1")
                     line_text = line_matches[0].strip()
-                    #todo Parse markdown
-                    list_items.append(LeafNode("li", line_text))
+                    text_nodes = text_to_textnodes(line_text)
+                    html_nodes = text_nodes_to_html_nodes(text_nodes)
+                    list_items.append(ParentNode("li", html_nodes))
                 block_nodes.append(ParentNode("ol", list_items))
     result = ParentNode("div", block_nodes)
     return result

@@ -3,7 +3,6 @@ from htmlnode import HTMLNode, LeafNode, ParentNode, text_node_to_html_node, mar
 from textnode import TextNode, TextType
 
 def print_line_diff(a, b):
-    html_text = node.to_html()
     for i in range(0, len(a)//80 + 1):
         print()
         print(a[i * 80: i * 80 + 80])
@@ -193,7 +192,7 @@ LeafNode("a", "link", {"href":"https://boot.dev/", "target":"_blank"}),
             "a quote",
             "</blockquote>",
             "<blockquote>",
-            "more quote\n",
+            "more quote ",
             "even more quote",
             "</blockquote>",
             "<ol>", "<li>",
@@ -323,45 +322,158 @@ LeafNode("a", "link", {"href":"https://boot.dev/", "target":"_blank"}),
             "</code>", "</p>", "</div>"
         ]))
 
-    #def test_markdown_to_html_node_quote_with_formatting(self):
-    #    markdown = "\n".join([
-    #        "> here's a **quote**",
-    #    ])
+    def test_markdown_to_html_node_quote_with_formatting(self):
+        markdown = "\n".join([
+            "> here's a **quote**",
+        ])
 
-    #    node = markdown_to_html_node(markdown)
+        node = markdown_to_html_node(markdown)
 
-    #    self.assertEqual(node.to_html(), "".join([
-    #        "<div>", "<blockquote>",
-    #        "here's a ", "<b>", "quote", "</b>",
-    #        "</blockquote>", "</div>"
-    #    ]))
+        self.assertEqual(node.to_html(), "".join([
+            "<div>", "<blockquote>",
+            "here's a ", "<b>", "quote", "</b>",
+            "</blockquote>", "</div>"
+        ]))
 
-    #    markdown = "\n".join([
-    #        "## here's a **header**",
-    #        "",
-    #        "###### here's _another_ **header**",
-    #        "",
-    #        "".join(["#### here's one with [some](https://boot.dev/) ",
-    #                 "[links](http://example.com/), `code`, but no _newline_"])
-    #    ])
+        markdown = "\n".join([
+            ">here's a **block quote**",
+            "",
+            "> here's _another_ **block quote**",
+            "",
+            "".join(["> here's one with [some](https://boot.dev/) \n",
+                     ">[links](http://example.com/), `code`, but no _newline_"])
+        ])
 
-    #    node = markdown_to_html_node(markdown)
+        node = markdown_to_html_node(markdown)
 
-    #    expected = "".join([
-    #        "<div>",
-    #        "<h2>",
-    #        "here's a ", "<b>", "header", "</b>",
-    #        "</h2>",
-    #        "<h6>",
-    #        "here's ", "<i>", "another", "</i>", " ", "<b>", "header", "</b>",
-    #        "</h6>",
-    #        "<h4>",
-    #        "here's one with ",
-    #        '<a href="https://boot.dev/">', "some", "</a>",
-    #        " ",
-    #        '<a href="http://example.com/">', "links", "</a>", ", "
-    #        "<code>", "code", "</code>", ", but no ", "<i>", "newline", "</i>",
-    #        "</h4>",
-    #        "</div>"])
+        expected = "".join([
+            "<div>",
+            "<blockquote>",
+            "here's a ", "<b>", "block quote", "</b>",
+            "</blockquote>",
+            "<blockquote>",
+            "here's ", "<i>", "another", "</i>", " ", "<b>", "block quote", "</b>",
+            "</blockquote>",
+            "<blockquote>",
+            "here's one with ",
+            '<a href="https://boot.dev/">', "some", "</a>",
+            " ",
+            '<a href="http://example.com/">', "links", "</a>", ", "
+            "<code>", "code", "</code>", ", but no ", "<i>", "newline", "</i>",
+            "</blockquote>",
+            "</div>"])
 
-    #    self.assertEqual(node.to_html(), expected)
+        print_line_diff(node.to_html(), expected)
+        self.assertEqual(node.to_html(), expected)
+
+    def test_markdown_to_html_node_unordered_list_with_formatting(self):
+        markdown = "\n".join([
+            "- here's a **list item**",
+        ])
+
+        node = markdown_to_html_node(markdown)
+
+        self.assertEqual(node.to_html(), "".join([
+            "<div>", "<ul>", "<li>",
+            "here's a ", "<b>", "list item", "</b>",
+            "</li>", "</ul>", "</div>"
+        ]))
+
+        markdown = "\n".join([
+            "- here's a **list item**",
+            "",
+            "- here's _another_ **list item**",
+            "",
+            "- here's a list with",
+            "- [some](https://boot.dev/)",
+            "- [links](http://example.com/)",
+            "- ![an image](http://example.com/image.png)",
+            "- `code`",
+            "- and **some** _formatting_"
+        ])
+
+        node = markdown_to_html_node(markdown)
+
+        expected = "".join([
+            "<div>",
+            "<ul>", "<li>",
+            "here's a ", "<b>", "list item", "</b>",
+            "</li>", "</ul>",
+            "<ul>", "<li>",
+            "here's ", "<i>", "another", "</i>", " ", "<b>", "list item", "</b>",
+            "</li>", "</ul>",
+            "<ul>", "<li>",
+            "here's a list with",
+            "</li>", "<li>",
+            '<a href="https://boot.dev/">', "some", "</a>",
+            "</li>", "<li>",
+            '<a href="http://example.com/">', "links", "</a>"
+            "</li>", "<li>",
+            '<img src="http://example.com/image.png" alt="an image">'"</img>"
+            "</li>", "<li>",
+            "<code>", "code", "</code>",
+            "</li>", "<li>",
+            "and ",
+            "<b>", "some", "</b>", " ",
+            "<i>", "formatting", "</i>",
+            "</li>", "</ul>",
+            "</div>"])
+
+        print_line_diff(node.to_html(), expected)
+        self.assertEqual(node.to_html(), expected)
+
+    def test_markdown_to_html_node_ordered_list_with_formatting(self):
+        markdown = "\n".join([
+            "1. here's a **list item**",
+        ])
+
+        node = markdown_to_html_node(markdown)
+
+        self.assertEqual(node.to_html(), "".join([
+            "<div>", "<ol>", "<li>",
+            "here's a ", "<b>", "list item", "</b>",
+            "</li>", "</ol>", "</div>"
+        ]))
+
+        markdown = "\n".join([
+            "5. here's a **list item**",
+            "",
+            "5. here's _another_ **list item**",
+            "",
+            "500. here's a list with",
+            "550. [some](https://boot.dev/)",
+            "148. [links](http://example.com/)",
+            "5. ![an image](http://example.com/image.png)",
+            "2. `code`",
+            "70. and **some** _formatting_"
+        ])
+
+        node = markdown_to_html_node(markdown)
+
+        expected = "".join([
+            "<div>",
+            "<ol>", "<li>",
+            "here's a ", "<b>", "list item", "</b>",
+            "</li>", "</ol>",
+            "<ol>", "<li>",
+            "here's ", "<i>", "another", "</i>", " ", "<b>", "list item", "</b>",
+            "</li>", "</ol>",
+            "<ol>", "<li>",
+            "here's a list with",
+            "</li>", "<li>",
+            '<a href="https://boot.dev/">', "some", "</a>",
+            "</li>", "<li>",
+            '<a href="http://example.com/">', "links", "</a>"
+            "</li>", "<li>",
+            '<img src="http://example.com/image.png" alt="an image">'"</img>"
+            "</li>", "<li>",
+            "<code>", "code", "</code>",
+            "</li>", "<li>",
+            "and ",
+            "<b>", "some", "</b>", " ",
+            "<i>", "formatting", "</i>",
+            "</li>", "</ol>",
+            "</div>"])
+
+        print_line_diff(node.to_html(), expected)
+        self.assertEqual(node.to_html(), expected)
