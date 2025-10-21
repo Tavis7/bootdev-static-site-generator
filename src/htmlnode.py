@@ -97,7 +97,7 @@ def markdown_to_html_node(text):
             case BlockType.CODE:
                 block_text = block.split("\n")
                 block_nodes.append(
-                    ParentNode("p",
+                    ParentNode("pre",
                                [LeafNode("code", "\n".join(block_text[1:-1]))]))
             case BlockType.QUOTE:
                 lines = block.split("\n")

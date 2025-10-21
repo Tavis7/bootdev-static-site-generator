@@ -204,10 +204,10 @@ LeafNode("a", "link", {"href":"https://boot.dev/", "target":"_blank"}),
             "<li>",
             "ordered list third",
             "</li>", "</ol>",
-            "<p>", "<code>",
+            "<pre>", "<code>",
             "def say_hello():\n",
             '    print "hello"',
-            "</code>", "</p>",
+            "</code>", "</pre>",
             "<h1>",
             "heading 1",
             "</h1>",
@@ -317,9 +317,9 @@ LeafNode("a", "link", {"href":"https://boot.dev/", "target":"_blank"}),
         node = markdown_to_html_node(markdown)
 
         self.assertEqual(node.to_html(), "".join([
-            "<div>", "<p>", "<code>",
+            "<div>", "<pre>", "<code>",
             "# here's a **code block**",
-            "</code>", "</p>", "</div>"
+            "</code>", "</pre>", "</div>"
         ]))
 
     def test_markdown_to_html_node_quote_with_formatting(self):
