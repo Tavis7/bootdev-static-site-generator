@@ -1,5 +1,5 @@
 import unittest
-from htmlnode import HTMLNode, LeafNode, ParentNode, text_node_to_html_node
+from htmlnode import HTMLNode, LeafNode, ParentNode, text_node_to_html_node, markdown_to_html_node
 from textnode import TextNode, TextType
 
 class TestHTMLNode(unittest.TestCase):
@@ -69,9 +69,9 @@ class TestHTMLNode(unittest.TestCase):
     def test_to_html_with_children(self):
         children = [
             LeafNode("span", "child"),
-            LeafNode("a", "link", {"href":"https://boot.dev/", "target":"_blank"}),
+LeafNode("a", "link", {"href":"https://boot.dev/", "target":"_blank"}),
             LeafNode("b", "bold")
-        ]
+]
         parent = ParentNode("div", children)
         self.assertEqual(parent.to_html(),
                          "".join(['<div><span>child</span>',
@@ -136,3 +136,72 @@ class TestHTMLNode(unittest.TestCase):
         text_node = TextNode("Image", TextType.IMAGE_TEXT, "example.com/image.png")
         html_node = text_node_to_html_node(text_node)
         self.assertEqual(html_node.to_html(), '<img src="example.com/image.png" alt="Image"></img>')
+
+    def test_markdown_to_html_node_basic(self):
+        markdown = "\n".join([
+            "here's a paragraph",
+            "",
+            "- unordered list first",
+            "- unordered list second",
+            "- unordered list third",
+            "",
+            "> a quote",
+            "",
+            "1. ordered list first",
+            "2. ordered list second",
+            "3. ordered list third",
+            "",
+            "",
+            "```python",
+            "def say_hello():",
+            '    print "hello"',
+            "```",
+            "",
+            "# heading 1",
+            "",
+            "## heading 2",
+            "",
+            "another paragraph"
+        ])
+
+        node = markdown_to_html_node(markdown)
+
+        self.assertEqual(node.to_html(), "".join([
+            "<div>", "<p>",
+            "here's a paragraph",
+            "</p>",
+            "<ul>", "<li>",
+            "unordered list first",
+            "</li>",
+            "<li>",
+            "unordered list second",
+            "</li>",
+            "<li>",
+            "unordered list third",
+            "</li>", "</ul>",
+            "<blockquote>",
+            "a quote",
+            "</blockquote>",
+            "<ol>", "<li>",
+            "ordered list first",
+            "</li>",
+            "<li>",
+            "ordered list second",
+            "</li>",
+            "<li>",
+            "ordered list third",
+            "</li>", "</ol>",
+            "<p>", "<code>",
+            "def say_hello():\n",
+            '    print "hello"',
+            "</code>", "</p>",
+            "<h1>",
+            "heading 1",
+            "</h1>",
+            "<h2>",
+            "heading 2",
+            "</h2>",
+            "<p>",
+            "another paragraph",
+            "</p>", "</div>"
+        ]))

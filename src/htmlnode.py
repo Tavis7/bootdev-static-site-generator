@@ -1,4 +1,6 @@
 from textnode import TextType, TextNode
+from markdownblock import markdown_to_blocks, block_to_block_type, BlockType
+import re
 
 def format_string_or_none(string):
     if string == None:
@@ -69,3 +71,57 @@ def text_node_to_html_node(text_node):
             return LeafNode("img", "", {"src":text_node.url, "alt":text_node.text})
         case _:
             raise Exception(f"Unknown text type: {text_node.text_type}")
+
+def markdown_to_html_node(text):
+    blocks = markdown_to_blocks(text)
+    block_nodes = []
+    for block in blocks:
+        block_type = block_to_block_type(block)
+        match block_type:
+            case BlockType.PARAGRAPH:
+                #todo Parse markdown
+                block_nodes.append(LeafNode("p", block))
+            case BlockType.HEADING:
+                sides = block.split(" ", maxsplit=1)
+                level = len(sides[0])
+                block_nodes.append(LeafNode(f"h{level}", sides[1]))
+            case BlockType.CODE:
+                block_text = block.split("\n")
+                block_nodes.append(
+                    ParentNode("p",
+                               [LeafNode("code", "\n".join(block_text[1:-1]))]))
+            case BlockType.QUOTE:
+                lines = block.split("\n")
+                for line in lines:
+                    # Assume single level for now
+                    # todo: multi-level quotes
+                    #sides = re.findall(r"(^>*)([^>].*$)", line)
+                    sides = re.findall(r"(^>)(.*$)", line)
+                    rest = sides[0][1]
+                    rest = rest.strip()
+                    # todo Parse markdown
+                    block_nodes.append(LeafNode("blockquote", rest))
+            case BlockType.UNORDERED_LIST:
+                lines = block.split("\n")
+                list_items = []
+                for line in lines:
+                    line_matches = re.findall(r"^- (.*)$", line)
+                    if len(line_matches) != 1:
+                        raise Exception(f"wrong number of matches: {len(line_matches)} != 1")
+                    line_text = line_matches[0].strip()
+                    #todo Parse markdown
+                    list_items.append(LeafNode("li", line_text))
+                block_nodes.append(ParentNode("ul", list_items))
+            case BlockType.ORDERED_LIST:
+                lines = block.split("\n")
+                list_items = []
+                for line in lines:
+                    line_matches = re.findall(r"^\d*. (.*)$", line)
+                    if len(line_matches) != 1:
+                        raise Exception(f"wrong number of matches: {len(line_matches)} != 1")
+                    line_text = line_matches[0].strip()
+                    #todo Parse markdown
+                    list_items.append(LeafNode("li", line_text))
+                block_nodes.append(ParentNode("ol", list_items))
+    result = ParentNode("div", block_nodes)
+    return result

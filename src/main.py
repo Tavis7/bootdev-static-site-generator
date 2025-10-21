@@ -1,22 +1,39 @@
 from textnode import TextType, TextNode, split_nodes_delimiter, extract_markdown_images, extract_markdown_links, split_nodes_images, split_nodes_links
-from htmlnode import HTMLNode, LeafNode, ParentNode, text_node_to_html_node
+from htmlnode import HTMLNode, LeafNode, ParentNode, text_node_to_html_node, markdown_to_html_node
 from markdownblock import markdown_to_blocks
 print("Hello world")
 
 def main():
-    text_node_1 = TextNode("Hello `code` world", TextType.PLAIN_TEXT)
-    split = split_nodes_delimiter([text_node_1], "`", TextType.CODE_TEXT)
-    print(split)
+    markdown = "\n".join([
+        "here's a paragraph",
+        "",
+        "- unordered list first",
+        "- unordered list second",
+        "- unordered list third",
+        "",
+        "> a quote",
+        "",
+        "1. ordered list first",
+        "2. ordered list second",
+        "3. ordered list third",
+        "",
+        "",
+        "```python",
+        "def say_hello():",
+        '    print "hello"',
+        "```",
+        "",
+        "# heading 1",
+        "",
+        "## heading 2",
+        "",
+        "another paragraph"
+    ])
 
-    images,_ = extract_markdown_images(
-        "".join(["![image](example.com/img.png), ",
-                 "and another: ![second image](example.com/img2.png)"]))
-    print("images: ",images)
-
-    node = TextNode("".join([
-        "This is an image: ![alt text](example.com/image.png).",
-    ]), TextType.PLAIN_TEXT)
-    new_nodes = split_nodes_images([node])
+    nodes = markdown_to_html_node(markdown)
+    print(nodes)
+    print()
+    print(nodes.to_html())
 
 if __name__ == "__main__":
     main()
