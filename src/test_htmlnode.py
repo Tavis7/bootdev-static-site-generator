@@ -363,7 +363,6 @@ LeafNode("a", "link", {"href":"https://boot.dev/", "target":"_blank"}),
             "</blockquote>",
             "</div>"])
 
-        print_line_diff(node.to_html(), expected)
         self.assertEqual(node.to_html(), expected)
 
     def test_markdown_to_html_node_unordered_list_with_formatting(self):
@@ -419,7 +418,6 @@ LeafNode("a", "link", {"href":"https://boot.dev/", "target":"_blank"}),
             "</li>", "</ul>",
             "</div>"])
 
-        print_line_diff(node.to_html(), expected)
         self.assertEqual(node.to_html(), expected)
 
     def test_markdown_to_html_node_ordered_list_with_formatting(self):
@@ -475,5 +473,4 @@ LeafNode("a", "link", {"href":"https://boot.dev/", "target":"_blank"}),
             "</li>", "</ol>",
             "</div>"])
 
-        print_line_diff(node.to_html(), expected)
         self.assertEqual(node.to_html(), expected)
