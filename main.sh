@@ -16,6 +16,7 @@ do
             ;;
         *)
             echo Invalid argument: $1
+            echo "Usage: $0 [ --server | --no-server ]... [ -- <program args> ]"
             exit 1
             ;;
     esac
