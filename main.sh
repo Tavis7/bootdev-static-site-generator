@@ -10,6 +10,10 @@ do
         "--server")
             RUN_SERVER=1
             ;;
+        "--")
+            shift
+            break
+            ;;
         *)
             echo Invalid argument: $1
             exit 1
@@ -18,7 +22,7 @@ do
     shift
 done
 
-python3 src/main.py || exit 1
+python3 src/main.py "$@" || exit 1
 
 if [ "$RUN_SERVER" -gt "0" ]
 then
