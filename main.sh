@@ -18,7 +18,7 @@ do
     shift
 done
 
-python3 src/main.py
+python3 src/main.py || exit 1
 
 if [ "$RUN_SERVER" -gt "0" ]
 then

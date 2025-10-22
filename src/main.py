@@ -22,25 +22,41 @@ def copy_path(src, dst):
                 print(f"{file} is file")
                 shutil.copy(filepath, dst)
 
+def generate_pages(src, template, dst):
+    print(f"Generating pages from {src} in {dst}")
+    if not os.path.exists(dst):
+        print(f"Making {dst}")
+        os.mkdir(dst)
+    else:
+        print(f"Not making {dst} {os.path.isdir(dst)}")
+
+    for file in os.listdir(src):
+        file_path = f"{src}/{file}"
+        if os.path.isdir(file_path):
+            dst_path = f"{dst}/{file}"
+            generate_pages(file_path, template, dst_path)
+        else:
+            filename_matches = re.findall(r"^(.*)(\.md)$", file)
+            if len(filename_matches) == 1:
+                filename_parts = filename_matches[0]
+                print(filename_parts)
+                print(f"Found markdown file: {file_path}")
+                generate_page(file_path, template, f"{dst}/{filename_parts[0]}.html")
+
+
 def generate_page(from_path, template_path, dest_path):
     print(f"Generating page from {from_path} to {dest_path} using {template_path}")
     content = ""
     with open(from_path, "r") as from_file:
         content = from_file.read()
-    print(content)
     template = ""
     with open(template_path, "r") as template_file:
         template = template_file.read()
-    print(template)
     html_content = markdown_to_html_node(content).to_html()
-    print(html_content)
-
     title = extract_title(content)
     print(title)
 
     title_parts = template.split("{{ Title }}")
-
-    print(title_parts)
 
     new_title_parts = []
     for title_part in title_parts:
@@ -50,16 +66,20 @@ def generate_page(from_path, template_path, dest_path):
     final_content = title.join(new_title_parts)
 
     with open(dest_path, "w") as dest_file:
+        print(f"Destination: {dest_file}")
         dest_file.write(final_content)
 
 
 def main():
     path = "static"
     dst = "public"
-    shutil.rmtree(dst)
+    if os.path.exists(dst):
+        shutil.rmtree(dst)
     copy_path(path, dst)
 
-    generate_page("content/index.md", "template.html", f"{dst}/index.html")
+    content = "content"
+    template = "template.html"
+    generate_pages(content, template, dst)
 
 
 if __name__ == "__main__":
