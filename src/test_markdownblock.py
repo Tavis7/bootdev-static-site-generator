@@ -1,5 +1,5 @@
 import unittest
-from markdownblock import markdown_to_blocks, BlockType, block_to_block_type
+from markdownblock import markdown_to_blocks, BlockType, block_to_block_type, extract_title
 
 class TestMarkdownBlock(unittest.TestCase):
     def test_markdown_to_blocks(self):
@@ -208,6 +208,33 @@ class TestMarkdownBlock(unittest.TestCase):
         block_type = block_to_block_type(text)
         self.assertNotEqual(block_type, expected_type)
 
+    def test_extract_title_alone(self):
+        text = "# this is a heading"
+        self.assertEqual(extract_title(text), "this is a heading")
+
+    def test_extract_title_with_content(self):
+        text = "# this is a heading\n\nand content"
+        self.assertEqual(extract_title(text), "this is a heading")
+
+    def test_extract_title_with_padding(self):
+        text = "# this is a heading      "
+        self.assertEqual(extract_title(text), "this is a heading")
+        text = "#       this is a heading"
+        self.assertEqual(extract_title(text), "this is a heading")
+        text = "# this is a heading\n"
+        self.assertEqual(extract_title(text), "this is a heading")
+        text = "#      this is a heading      \n"
+        self.assertEqual(extract_title(text), "this is a heading")
+
+    def test_extract_title_with_padding_and_content(self):
+        text = "# this is a heading    \n\nand content"
+        self.assertEqual(extract_title(text), "this is a heading")
+
+        text = "#     this is a heading\n\nand content"
+        self.assertEqual(extract_title(text), "this is a heading")
+
+        text = "#      this is a heading    \n\nand content"
+        self.assertEqual(extract_title(text), "this is a heading")
 
 if __name__ == "__main__":
     unittest.main()

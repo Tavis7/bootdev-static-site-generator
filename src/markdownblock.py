@@ -32,3 +32,11 @@ def block_to_block_type(block):
         return BlockType.ORDERED_LIST
     else:
         return BlockType.PARAGRAPH
+
+def extract_title(markdown):
+    matches = re.findall("(^# )([^\n]*)(?:\n\n.*|\n*$)", markdown)
+    if len(matches) != 1:
+        raise Exception("Title not found")
+    title = matches[0][1].strip()
+    return title
+
